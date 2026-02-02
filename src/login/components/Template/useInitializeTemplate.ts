@@ -1,12 +1,12 @@
-import { useAuthChecker } from "@/login/components/Template/useAuthChecker";
 import { useInsertScriptTags } from "@keycloakify/login-ui/tools/useInsertScriptTags";
 import { useEffect } from "react";
 import { useKcContext } from "../../KcContext";
+import { useAuthChecker } from "./useAuthChecker";
 
 export function useInitializeTemplate() {
     const { kcContext } = useKcContext();
 
-    useAuthChecker(kcContext);
+    useAuthChecker();
 
     const { insertScriptTags } = useInsertScriptTags({
         effectId: "Template",
@@ -22,7 +22,5 @@ export function useInitializeTemplate() {
 
     useEffect(() => {
         insertScriptTags();
-    }, [insertScriptTags]);
-
-    return { isReadyToRender: true };
+    }, []);
 }

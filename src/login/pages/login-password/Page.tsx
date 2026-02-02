@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Label } from "@/components/ui/label";
-import { PasswordWrapper } from "@/login/components/PasswordWrapper";
+import { PasswordVisibilityButton } from "@/login/components/PasswordWrapper";
 import { useI18n } from "@/login/i18n";
 import { useKcContext } from "@/login/KcContext";
 import { useKcClsx } from "@keycloakify/login-ui/useKcClsx";
@@ -56,7 +56,7 @@ export function Page() {
                             )}
                         />
                         <InputGroupAddon align="inline-end">
-                            <PasswordWrapper passwordInputId="password" />
+                            <PasswordVisibilityButton passwordInputId="password" />
                         </InputGroupAddon>
                     </InputGroup>
                     {kcContext.messagesPerField.existsError("password") && (

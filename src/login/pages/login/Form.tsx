@@ -10,7 +10,7 @@ import { useKcClsx } from "@keycloakify/login-ui/useKcClsx";
 import { Fingerprint } from "lucide-react";
 import { useState } from "react";
 import { assert } from "tsafe/assert";
-import { PasswordWrapper } from "../../components/PasswordWrapper";
+import { PasswordVisibilityButton } from "../../components/PasswordWrapper";
 import { useI18n } from "../../i18n";
 import { useScript } from "./useScript";
 
@@ -105,7 +105,7 @@ export function Form() {
                                         )}
                                     />
                                     <InputGroupAddon align="inline-end" >
-                                        <PasswordWrapper
+                                        <PasswordVisibilityButton
                                             passwordInputId="password" tabIndex={4} />
                                     </InputGroupAddon>
                                 </InputGroup>

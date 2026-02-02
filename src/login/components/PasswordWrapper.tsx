@@ -4,7 +4,7 @@ import { useIsPasswordRevealed } from "keycloakify/tools/useIsPasswordRevealed";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 
-export function PasswordWrapper(props: {
+export function PasswordVisibilityButton(props: {
     passwordInputId: string;
     tabIndex?: number;
 }) {

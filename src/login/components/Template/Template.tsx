@@ -71,11 +71,7 @@ export function Template(props: {
         className: bodyClassName ?? kcClsx("kcBodyClass")
     });
 
-    const { isReadyToRender } = useInitializeTemplate();
-
-    if (!isReadyToRender) {
-        return null;
-    }
+    useInitializeTemplate();
 
     return (
         <div className="grid min-h-svh lg:grid-cols-2 bg-white dark:bg-background lg:bg-transparent">

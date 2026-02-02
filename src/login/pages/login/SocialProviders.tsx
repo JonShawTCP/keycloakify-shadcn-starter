@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { kcSanitize } from "@keycloakify/login-ui/kcSanitize";
 import { clsx } from "@keycloakify/login-ui/tools/clsx";
 import { useKcClsx } from "@keycloakify/login-ui/useKcClsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { assert } from "tsafe/assert";
 import { useI18n } from "../../i18n";
 import { useKcContext } from "../../KcContext";
@@ -19,16 +19,8 @@ export function SocialProviders() {
     const providerLogos = useProviderLogos();
     const { msg } = useI18n();
     const { kcClsx } = useKcClsx();
-    const [lastProvider, setLastProvider] = useState<string | null>(null);
 
-    useEffect(() => {
-        const saved = localStorage.getItem(LAST_PROVIDER_KEY);
-        setLastProvider(saved);
-    }, []);
-
-    const handleProviderClick = (alias: string) => {
-        localStorage.setItem(LAST_PROVIDER_KEY, alias);
-    };
+    const [lastProvider] = useState(() => localStorage.getItem(LAST_PROVIDER_KEY));
 
     if (
         kcContext.social.providers === undefined ||
@@ -63,8 +55,7 @@ export function SocialProviders() {
                                         "flex items-center justify-center gap-3 "
                                     )}
                                     href={p.loginUrl}
-                                    onClick={() => handleProviderClick(p.alias)}
-                                >
+                                    onClick={() => localStorage.setItem(LAST_PROVIDER_KEY, p.alias)}                                >
                                     <div className={"h-5 w-5"}>
                                         {providerLogos[p.alias] ? (
                                             <img

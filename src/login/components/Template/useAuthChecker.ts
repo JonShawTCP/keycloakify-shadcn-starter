@@ -1,10 +1,10 @@
-import type { KcContext } from "@/login/KcContext";
+import { useKcContext } from "@/login/KcContext";
 import { useEffect, useRef } from "react";
 
 // see https://github.com/keycloak/keycloak/blob/main/themes/src/main/resources/theme/base/login/resources/js/authChecker.js
 
-const SESSION_POLLING_INTERVAL = 2000;
-const AUTH_SESSION_TIMEOUT_MILLISECS = 1000;
+const SESSION_POLLING_INTERVAL_MS = 2000;
+const AUTH_SESSION_TIMEOUT_MS = 1000;
 
 function getCookieByName(name: string) {
     for (const cookie of document.cookie.split(";")) {
@@ -18,86 +18,90 @@ function getCookieByName(name: string) {
     return null;
 }
 
-function getKcAuthSessionHash() {
-    return getCookieByName("KC_AUTH_SESSION_HASH");
-}
+export function useAuthChecker() {
+    const { kcContext } = useKcContext();
 
-function getSession() {
-    return getCookieByName("KEYCLOAK_SESSION");
-}
+    const shouldPollRef = useRef(true);
 
-/**
- * 1. Check Auth Session Validity
- *
- * Checks if the current tab's authentication session ID matches the one stored in the browser cookie.
- *
- * If the user opens the login page in Tab A, then opens it again in Tab B, the server might generate
- * a new session ID. Tab A is now "stale". If the user tries to log in on Tab A, it would fail.
- * This hook detects that mismatch and refreshes the page to get the new ID.
- */
-function useCheckAuthSessionValidity(
-    authenticationSession: KcContext["authenticationSession"]
-) {
+    /**
+     * Checks if the current tab's authentication session ID matches the one stored in the browser cookie.
+     *
+     * If the user opens the login page in Tab A, then opens it again in Tab B, the server might generate
+     * a new session ID. Tab A is now "stale". If the user tries to log in on Tab A, it would fail.
+     * This hook detects that mismatch and refreshes the page to get the new ID.
+     */
     useEffect(() => {
-        const pageAuthSessionHash = authenticationSession?.authSessionIdHash;
-        if (!pageAuthSessionHash) return;
+        if (kcContext.authenticationSession === undefined) {
+            return;
+        }
+
+        const { authSessionIdHash } = kcContext.authenticationSession;
 
         const timer = setTimeout(() => {
-            const cookieAuthSessionHash = getKcAuthSessionHash();
+            const authSessionIdHashCookie = getCookieByName("KC_AUTH_SESSION_HASH");
             // If the cookie exists, but doesn't match the ID in our current HTML/Context
-            if (cookieAuthSessionHash && cookieAuthSessionHash !== pageAuthSessionHash) {
+            if (
+                authSessionIdHashCookie &&
+                authSessionIdHashCookie !== authSessionIdHash
+            ) {
                 location.reload();
             }
-        }, AUTH_SESSION_TIMEOUT_MILLISECS);
+        }, AUTH_SESSION_TIMEOUT_MS);
 
         return () => clearTimeout(timer);
-    }, [authenticationSession]);
-}
+    }, []);
 
-/**
- * 2. Auto-Login Polling
- *
- * Polls for a valid KEYCLOAK_SESSION cookie every few seconds.
- *
- * If the user leaves this tab open and logs into the app via a different tab (SSO),
- * this hook detects the new session and automatically redirects this tab to the success URL.
- */
-function useAutoLoginPolling(redirectUrl: string | undefined) {
-    const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+    /**
+     * Polls for a valid KEYCLOAK_SESSION cookie every few seconds.
+     *
+     * If the user leaves this tab open and logs into the app via a different tab (SSO),
+     * this hook detects the new session and automatically redirects this tab to the success URL.
+     */
     useEffect(() => {
-        if (!redirectUrl) return;
+        const keycloakSessionCookie = () => getCookieByName("KEYCLOAK_SESSION");
 
         // If we already have a session upon loading, do nothing
-        const initialSession = getSession();
-        if (initialSession) return;
+        if (keycloakSessionCookie() !== null) {
+            return;
+        }
+
+        let timer: ReturnType<typeof setTimeout>;
 
         const poll = () => {
-            const session = getSession();
-
-            if (!session) {
+            if (keycloakSessionCookie() === null) {
                 // No session yet, check again in 2 seconds
-                pollingTimeoutRef.current = setTimeout(poll, SESSION_POLLING_INTERVAL);
-            } else {
-                // Session found! Redirect to the app.
-                location.href = redirectUrl;
+                timer = setTimeout(poll, SESSION_POLLING_INTERVAL_MS);
+                return;
             }
+
+            location.href = kcContext.url.ssoLoginInOtherTabsUrl;
         };
 
-        // Start the polling loop
-        pollingTimeoutRef.current = setTimeout(poll, SESSION_POLLING_INTERVAL);
+        const handleFormSubmit = () => {
+            shouldPollRef.current = false;
+            clearTimeout(timer);
+        };
 
-        // Cleanup: Stop the timer if the component unmounts
+        const handleBeforeUnload = () => {
+            shouldPollRef.current = false;
+            clearTimeout(timer);
+        };
+
+        const forms = Array.from(document.forms);
+        forms.forEach(form => {
+            form.addEventListener("submit", handleFormSubmit);
+        });
+
+        globalThis.addEventListener("beforeunload", handleBeforeUnload);
+
+        poll();
+
         return () => {
-            if (pollingTimeoutRef.current) {
-                clearTimeout(pollingTimeoutRef.current);
-            }
+            clearTimeout(timer);
+            forms.forEach(form => {
+                form.removeEventListener("submit", handleFormSubmit);
+            });
+            globalThis.removeEventListener("beforeunload", handleBeforeUnload);
         };
-    }, [redirectUrl]);
-}
-
-export function useAuthChecker(kcContext: KcContext) {
-    useCheckAuthSessionValidity(kcContext.authenticationSession);
-
-    useAutoLoginPolling(kcContext.url.ssoLoginInOtherTabsUrl);
+    }, []);
 }

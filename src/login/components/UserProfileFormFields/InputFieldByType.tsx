@@ -3,7 +3,7 @@ import type {
     FormAction,
     FormFieldError
 } from "@keycloakify/login-ui/useUserProfileForm";
-import { PasswordWrapper } from "../PasswordWrapper";
+import { PasswordVisibilityButton } from "../PasswordWrapper";
 import { InputTag } from "./InputTag";
 import { InputTagSelects } from "./InputTagSelects";
 import { SelectTag } from "./SelectTag";
@@ -54,9 +54,9 @@ export function InputFieldByType(props: InputFieldByTypeProps) {
 
             if (attribute.name === "password" || attribute.name === "password-confirm") {
                 return (
-                    <PasswordWrapper passwordInputId={attribute.name}>
+                    <PasswordVisibilityButton passwordInputId={attribute.name}>
                         {inputNode}
-                    </PasswordWrapper>
+                    </PasswordVisibilityButton>
                 );
             }
 
