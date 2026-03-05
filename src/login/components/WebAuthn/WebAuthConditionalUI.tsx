@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Fingerprint } from "lucide-react";
-import { useEffect, useRef } from "react";
 import { assert } from "tsafe/assert";
 import { useI18n } from '../../i18n';
 import { useKcContext } from '../../KcContext';
-import { usePasskeysConditionalAuth } from './usePasskeysConditionalAuth';
-import { useWebAuthn, type AuthenticateOptions, type WebAuthnResult } from './useWebAuthn';
+import { useWebAuthnConditionalUI } from './useWebAuthnConditionalUI';
 
 
 export function WebAuthnConditionalUI() {
@@ -16,68 +14,7 @@ export function WebAuthnConditionalUI() {
 
     const { msgStr } = useI18n();
 
-    const { authenticate } = useWebAuthn();
-
-    const { initAuthenticate } = usePasskeysConditionalAuth();
-
-    const webAuthnFormRef = useRef<HTMLFormElement>(null);
-    const clientDataJSONRef = useRef<HTMLInputElement>(null);
-    const authenticatorDataRef = useRef<HTMLInputElement>(null);
-    const signatureRef = useRef<HTMLInputElement>(null);
-    const credentialIdRef = useRef<HTMLInputElement>(null);
-    const userHandleRef = useRef<HTMLInputElement>(null);
-    const errorRef = useRef<HTMLInputElement>(null);
-
-    // Define Submission Logic
-    const submitWebAuthn = (result: WebAuthnResult) => {
-        if (!webAuthnFormRef.current) return;
-
-        if (result.success) {
-            if (clientDataJSONRef.current) clientDataJSONRef.current.value = result.clientDataJSON;
-            if (authenticatorDataRef.current) authenticatorDataRef.current.value = result.authenticatorData;
-            if (signatureRef.current) signatureRef.current.value = result.signature;
-            if (credentialIdRef.current) credentialIdRef.current.value = result.credentialId;
-            if (userHandleRef.current) userHandleRef.current.value = result.userHandle;
-            webAuthnFormRef.current.submit();
-        } else {
-            if (errorRef.current) errorRef.current.value = result.error;
-            webAuthnFormRef.current.submit();
-        }
-    };
-
-    // Common Config
-    const authOptions: AuthenticateOptions = {
-        isUserIdentified: kcContext.isUserIdentified === "true",
-        challenge: kcContext.challenge,
-        userVerification: kcContext.userVerification,
-        rpId: kcContext.rpId,
-        createTimeout: typeof kcContext.createTimeout === "string"
-            ? Number(kcContext.createTimeout)
-            : kcContext.createTimeout,
-        authenticators: kcContext.authenticators?.authenticators
-    };
-
-
-
-    const handleWebAuthnClick = async () => {
-        const result = await authenticate({
-            ...authOptions,
-            errmsg: msgStr("webauthn-unsupported-browser-text"),
-            mediation: 'optional'
-        });
-        if (result) submitWebAuthn(result);
-    };
-
-    // Initialize conditional authentication after component mounts
-    useEffect(() => {
-        if (!kcContext.enableWebAuthnConditionalUI) return;
-        initAuthenticate({
-            ...authOptions,
-            enabled: true,
-            errmsg: msgStr("passkey-unsupported-browser-text"),
-            onSuccess: submitWebAuthn
-        });
-    }, []); // Run only once on mount
+    const { webAuthnFormRef, onPasskeyDoAuthenticateClick } = useWebAuthnConditionalUI();
 
     if (!kcContext.enableWebAuthnConditionalUI) return null;
 
@@ -90,12 +27,12 @@ export function WebAuthnConditionalUI() {
                 method="post"
                 ref={webAuthnFormRef}
             >
-                <input type="hidden" id="clientDataJSON" name="clientDataJSON" ref={clientDataJSONRef} />
-                <input type="hidden" id="authenticatorData" name="authenticatorData" ref={authenticatorDataRef} />
-                <input type="hidden" id="signature" name="signature" ref={signatureRef} />
-                <input type="hidden" id="credentialId" name="credentialId" ref={credentialIdRef} />
-                <input type="hidden" id="userHandle" name="userHandle" ref={userHandleRef} />
-                <input type="hidden" id="error" name="error" ref={errorRef} />
+                <input type="hidden" id="clientDataJSON" name="clientDataJSON" />
+                <input type="hidden" id="authenticatorData" name="authenticatorData" />
+                <input type="hidden" id="signature" name="signature" />
+                <input type="hidden" id="credentialId" name="credentialId" />
+                <input type="hidden" id="userHandle" name="userHandle" />
+                <input type="hidden" id="error" name="error" />
             </form>
 
             <Button
@@ -103,7 +40,7 @@ export function WebAuthnConditionalUI() {
                 type="button"
                 className="w-full"
                 variant="outline"
-                onClick={handleWebAuthnClick}
+                onClick={onPasskeyDoAuthenticateClick}
             >
                 <Fingerprint className="w-4 h-4" />
                 {msgStr("passkey-doAuthenticate")}

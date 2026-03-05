@@ -92,7 +92,7 @@ export function Page() {
                     </Button>
                 </div>
             </form>
-            <WebAuthnConditionalUI />
+            {kcContext.enableWebAuthnConditionalUI && <WebAuthnConditionalUI />}
         </Template>
     );
 }

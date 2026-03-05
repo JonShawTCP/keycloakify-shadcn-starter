@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { LogoutOtherSessions } from "@/login/components/LogoutOtherSessions";
+import { webAuthnRegister, type WebAuthnRegisterResult } from '@/login/pages/webauthn-register/useWebAuthnRegister';
 import { useI18n } from "@/login/i18n";
 import { useKcContext } from "@/login/KcContext";
 import { useRef } from "react";
 import { assert } from "tsafe/assert";
 import { Template } from "../../components/Template";
-import { useWebAuthnRegister, type WebAuthnRegisterResult } from '@/login/components/WebAuthn/useWebAuthnRegister';
 
 export function Page() {
     const { kcContext } = useKcContext();
@@ -21,7 +21,6 @@ export function Page() {
     const transportsRef = useRef<HTMLInputElement>(null);
     const errorRef = useRef<HTMLInputElement>(null);
 
-    const { register } = useWebAuthnRegister();
 
     const submitRegister = (result: WebAuthnRegisterResult, label?: string) => {
         if (!registerFormRef.current) return;
@@ -39,9 +38,8 @@ export function Page() {
         registerFormRef.current.submit();
     };
 
-    // Click Handler
     const handleRegisterClick = async () => {
-        const result = await register({
+        const result = await webAuthnRegister({
             challenge: kcContext.challenge,
             userid: kcContext.userid,
             username: kcContext.username,
