@@ -4,7 +4,7 @@ import { useI18n } from "@/login/i18n";
 import { useKcContext } from "@/login/KcContext";
 import { assert } from "tsafe/assert";
 import { Template } from "../../components/Template";
-import { useLogic } from './useWebAuthnRegister.useLogic';
+import { useLogic } from './useLogic';
 
 export function Page() {
     const { kcContext } = useKcContext();

@@ -4,7 +4,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Label } from "@/components/ui/label";
-import { WebAuthnConditionalUI } from '@/login/components/WebAuthn/WebAuthConditionalUI';
+import { WebAuthnConditionalUI } from '@/login/components/WebAuthnConditionalUi';
 import { useKcContext } from "@/login/KcContext";
 import { kcSanitize } from "@keycloakify/login-ui/kcSanitize";
 import { useKcClsx } from "@keycloakify/login-ui/useKcClsx";

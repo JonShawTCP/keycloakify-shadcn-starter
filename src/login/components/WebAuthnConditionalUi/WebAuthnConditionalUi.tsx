@@ -3,7 +3,7 @@ import { Fingerprint } from "lucide-react";
 import { assert } from "tsafe/assert";
 import { useI18n } from '../../i18n';
 import { useKcContext } from '../../KcContext';
-import { useWebAuthnConditionalUI } from './useWebAuthnConditionalUI';
+import { useLogic } from './useLogic';
 
 
 export function WebAuthnConditionalUI() {
@@ -14,7 +14,7 @@ export function WebAuthnConditionalUI() {
 
     const { msgStr } = useI18n();
 
-    const { webAuthnFormRef, onPasskeyDoAuthenticateClick } = useWebAuthnConditionalUI();
+    const { webAuthnFormRef, onPasskeyDoAuthenticateClick } = useLogic();
 
     if (!kcContext.enableWebAuthnConditionalUI) return null;
 

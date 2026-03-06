@@ -1,5 +1,9 @@
+import { useEffect, useRef } from "react";
 import { base64url } from "rfc4648";
-import { getWebAuthnSignal } from "./webAuthnAbortController";
+import { assert } from "tsafe/assert";
+import { useI18n } from "../../i18n";
+import { useKcContext } from "../../KcContext";
+
 
 // see https://github.com/keycloak/keycloak/blob/main/themes/src/main/resources/theme/base/login/resources/js/webauthnAuthenticate.js
 
@@ -60,17 +64,107 @@ export type AuthenticateOptions = {
  */
 export type WebAuthnResult =
     | {
-          success: true;
-          clientDataJSON: string;
-          authenticatorData: string;
-          signature: string;
-          credentialId: string;
-          userHandle: string;
-      }
+        success: true;
+        clientDataJSON: string;
+        authenticatorData: string;
+        signature: string;
+        credentialId: string;
+        userHandle: string;
+    }
     | {
-          success: false;
-          error: string;
-      };
+        success: false;
+        error: string;
+    };
+
+
+let abortController: AbortController | undefined = undefined;
+
+export function useLogic() {
+    const { kcContext } = useKcContext();
+    assert("enableWebAuthnConditionalUI" in kcContext);
+
+    const { msgStr } = useI18n();
+
+    const webAuthnFormRef = useRef<HTMLFormElement>(null);
+    const submitWebAuthn = (result: WebAuthnResult) => {
+        const form = webAuthnFormRef.current;
+        assert(form !== null);
+
+        const getInput = (name: string) => {
+            const input = form.elements.namedItem(name);
+            assert(input instanceof HTMLInputElement, `Missing hidden input: ${name}`);
+            return input;
+        };
+
+        if (result.success) {
+            getInput("clientDataJSON").value = result.clientDataJSON;
+            getInput("authenticatorData").value = result.authenticatorData;
+            getInput("signature").value = result.signature;
+            getInput("credentialId").value = result.credentialId;
+            getInput("userHandle").value = result.userHandle;
+        } else {
+            getInput("error").value = result.error;
+        }
+
+        form.submit();
+    };
+
+    const authOptions = {
+        isUserIdentified: kcContext.isUserIdentified === "true",
+        challenge: kcContext.challenge,
+        userVerification: kcContext.userVerification,
+        rpId: kcContext.rpId,
+        createTimeout:
+            typeof kcContext.createTimeout === "string"
+                ? Number(kcContext.createTimeout)
+                : kcContext.createTimeout,
+        authenticators: kcContext.authenticators?.authenticators
+    };
+
+    const onPasskeyDoAuthenticateClick = async () => {
+        const result = await authenticate({
+            ...authOptions,
+            mediation: "optional",
+            errmsg: msgStr("webauthn-unsupported-browser-text")
+        });
+        if (result) submitWebAuthn(result);
+    };
+
+    useEffect(() => {
+        let cancelled = false;
+
+        (async () => {
+            if (
+                !window.PublicKeyCredential ||
+                !PublicKeyCredential.isConditionalMediationAvailable
+            )
+                return;
+
+            const isAvailable =
+                await PublicKeyCredential.isConditionalMediationAvailable();
+            if (!isAvailable) return;
+
+            const result = await authenticate({
+                ...authOptions,
+                mediation: "conditional",
+                errmsg: msgStr("passkey-unsupported-browser-text")
+            });
+
+            if (cancelled) return;
+            if (result) submitWebAuthn(result);
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    return {
+        webAuthnFormRef,
+        onPasskeyDoAuthenticateClick
+    };
+}
+
 
 export async function authenticate(
     options: AuthenticateOptions
@@ -137,8 +231,8 @@ export async function authenticate(
             credentialId: credential.id,
             userHandle: response.userHandle
                 ? base64url.stringify(new Uint8Array(response.userHandle), {
-                      pad: false
-                  })
+                    pad: false
+                })
                 : ""
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,4 +243,22 @@ export async function authenticate(
             error: error.message || "Unknown WebAuthn error"
         };
     }
+}
+
+/**
+ * Get an abort signal for the current WebAuthn operation.
+ * Automatically aborts any previous pending WebAuthn request.
+ *
+ * @returns AbortSignal for use with navigator.credentials.get()
+ */
+export function getWebAuthnSignal(): AbortSignal {
+    if (abortController) {
+        // Abort the previous call
+        const abortError = new Error("Cancelling pending WebAuthn call");
+        abortError.name = "AbortError";
+        abortController.abort(abortError);
+    }
+
+    abortController = new AbortController();
+    return abortController.signal;
 }

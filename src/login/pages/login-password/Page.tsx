@@ -3,7 +3,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Label } from "@/components/ui/label";
 import { PasswordVisibilityButton } from "@/login/components/PasswordVisibilityButton";
-import { WebAuthnConditionalUI } from '@/login/components/WebAuthn/WebAuthConditionalUI';
+import { WebAuthnConditionalUI } from '@/login/components/WebAuthnConditionalUi';
 import { useI18n } from "@/login/i18n";
 import { useKcContext } from "@/login/KcContext";
 import { kcSanitize } from "keycloakify/lib/kcSanitize";
