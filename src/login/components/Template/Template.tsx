@@ -116,7 +116,7 @@ export function Template(props: {
                                                 className="flex items-center justify-between gap-2"
                                             >
                                                 <div className="flex gap-4 items-center">
-                                                    <User className="text-muted-foreground h-6 w-6" />
+                                                    <User className="text-muted-foreground size-6" />
 
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="text-xs font-normal text-muted-foreground">
@@ -148,7 +148,7 @@ export function Template(props: {
                                                                         "restartLoginTooltip"
                                                                     )}
                                                                 >
-                                                                    <RotateCcw className="h-4 w-4" />
+                                                                    <RotateCcw className="size-4" />
                                                                 </a>
                                                             </Button>
                                                         </TooltipTrigger>
