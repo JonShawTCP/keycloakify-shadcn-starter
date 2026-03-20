@@ -15,7 +15,8 @@ const { I18nProvider, useI18n } = i18nBuilder
             doRegister: "Sign up",
             "organization.selectTitle": "Choose Your Organization",
             "organization.pickPlaceholder": "Pick an organization to continue",
-            "identity-provider-login-last-used": "Last used"
+            "identity-provider-login-last-used": "Last used",
+            attemptedUsernameLoggingInAs: "Logging in as",
         },
         ar: {
             welcomeMessage: "مرحبًا بك في Acme inc - بوابتك إلى التخطيط والتنظيم السلس.",
@@ -26,7 +27,8 @@ const { I18nProvider, useI18n } = i18nBuilder
             noAccount: "ليس لديك حساب؟",
             "organization.selectTitle": "اختر مؤسستك",
             "organization.pickPlaceholder": "اختر مؤسسة للمتابعة",
-            "identity-provider-login-last-used": "آخر استخدام"
+            "identity-provider-login-last-used": "آخر استخدام",
+            attemptedUsernameLoggingInAs: "تسجيل الدخول كـ",
         },
         fr: {
             welcomeMessage:
@@ -39,7 +41,8 @@ const { I18nProvider, useI18n } = i18nBuilder
             "organization.selectTitle": "Choisissez Votre Organisation",
             "organization.pickPlaceholder":
                 "Sélectionnez une organisation pour continuer",
-            "identity-provider-login-last-used": "Dernière utilisation"
+            "identity-provider-login-last-used": "Dernière utilisation",
+            attemptedUsernameLoggingInAs: "Se connecter en tant que",
         }
     })
     .build();

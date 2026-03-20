@@ -7,7 +7,7 @@ import { redirectUrlOrigin } from "@/login/shared/redirectUrlOrigin";
 import { kcSanitize } from "@keycloakify/login-ui/kcSanitize";
 import { useKcClsx } from "@keycloakify/login-ui/useKcClsx";
 import { useSetClassName } from "keycloakify/tools/useSetClassName";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, User } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { FiHome } from "react-icons/fi";
@@ -113,14 +113,23 @@ export function Template(props: {
                                         ) : (
                                             <div
                                                 id="kc-username"
-                                                className="flex items-center justify-center gap-2"
+                                                className="flex items-center justify-between gap-2"
                                             >
-                                                <label
-                                                    className="font-semibold text-lg"
-                                                    id="kc-attempted-username"
-                                                >
-                                                    {auth.attemptedUsername}
-                                                </label>
+                                                <div className="flex gap-4 items-center">
+                                                    <User className="text-muted-foreground h-6 w-6" />
+
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-xs font-normal text-muted-foreground">
+                                                            {msgStr("attemptedUsernameLoggingInAs")}
+                                                        </span>
+                                                        <label
+                                                            className="font-semibold text-lg"
+                                                            id="kc-attempted-username"
+                                                        >
+                                                            {auth.attemptedUsername}
+                                                        </label>
+                                                    </div>
+                                                </div>
 
                                                 <TooltipProvider>
                                                     <Tooltip>
