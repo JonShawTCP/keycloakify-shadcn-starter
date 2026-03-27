@@ -65,7 +65,7 @@ export default defineConfig({
                             if (content.includes("+ locale +")) {
                                 await fs.writeFile(
                                     filePath,
-                                    content.replace(
+                                    content.replaceAll(
                                         '+ locale +',
                                         '+ locale?replace("_", "-") +'
                                     )
