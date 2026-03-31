@@ -44,7 +44,7 @@ export function Page() {
                     <span>
                         {msg("noAccount")}{" "}
                         <a
-                            className="text-primary dark:text-primary-foreground underline underline-offset-4 "
+                            className="underline underline-offset-4 "
                             tabIndex={8}
                             href={url.registrationUrl}
                         >
@@ -138,7 +138,14 @@ export function Page() {
                     </form>
                 )}
 
-                {kcContext.enableWebAuthnConditionalUI && <WebAuthnConditionalUI />}
+                {kcContext.enableWebAuthnConditionalUI && <WebAuthnConditionalUI
+                    isUserIdentified={kcContext.isUserIdentified}
+                    challenge={kcContext.challenge}
+                    rpId={kcContext.rpId}
+                    userVerification={kcContext.userVerification}
+                    createTimeout={kcContext.createTimeout}
+                    authenticators={kcContext.authenticators?.authenticators}
+                    loginAction={kcContext.url.loginAction} />}
             </div>
         </Template>
     );

@@ -1,29 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Fingerprint } from "lucide-react";
-import { assert } from "tsafe/assert";
 import { useI18n } from '../../i18n';
-import { useKcContext } from '../../KcContext';
-import { useLogic } from './useLogic';
+import { useLogic, type UseLogicProps } from './useLogic';
 
 
-export function WebAuthnConditionalUI() {
-
-    const { kcContext } = useKcContext();
-
-    assert("enableWebAuthnConditionalUI" in kcContext);
+export function WebAuthnConditionalUI(props: UseLogicProps) {
 
     const { msgStr } = useI18n();
 
-    const { webAuthnFormRef, onPasskeyDoAuthenticateClick } = useLogic();
+    const { webAuthnFormRef, onPasskeyDoAuthenticateClick } = useLogic(props);
 
-    if (!kcContext.enableWebAuthnConditionalUI) return null;
+    const { loginAction } = props;
 
     return (
         <>
             <form
                 id="webauth"
                 className='mt-4'
-                action={kcContext.url.loginAction}
+                action={loginAction}
                 method="post"
                 ref={webAuthnFormRef}
             >

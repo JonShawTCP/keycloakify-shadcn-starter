@@ -189,7 +189,15 @@ export function Form() {
                 </div>
             </div>
 
-            {kcContext.enableWebAuthnConditionalUI && <WebAuthnConditionalUI />}
+            {kcContext.enableWebAuthnConditionalUI && <WebAuthnConditionalUI
+                isUserIdentified={kcContext.isUserIdentified}
+                challenge={kcContext.challenge}
+                rpId={kcContext.rpId}
+                userVerification={kcContext.userVerification}
+                createTimeout={kcContext.createTimeout}
+                authenticators={kcContext.authenticators?.authenticators}
+                loginAction={kcContext.url.loginAction}
+            />}
         </>
     );
 }

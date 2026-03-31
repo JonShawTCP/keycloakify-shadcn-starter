@@ -1,8 +1,8 @@
+import type { KcContext } from '@keycloakify/login-ui/core/KcContext/KcContext';
 import { useEffect, useRef } from "react";
 import { base64url } from "rfc4648";
 import { assert } from "tsafe/assert";
 import { useI18n } from "../../i18n";
-import { useKcContext } from "../../KcContext";
 
 
 // see https://github.com/keycloak/keycloak/blob/main/themes/src/main/resources/theme/base/login/resources/js/webauthnAuthenticate.js
@@ -79,11 +79,21 @@ export type WebAuthnResult =
 
 let abortController: AbortController | undefined = undefined;
 
-export function useLogic() {
-    const { kcContext } = useKcContext();
-    assert("enableWebAuthnConditionalUI" in kcContext);
+export interface UseLogicProps {
+    isUserIdentified: "true" | "false";
+    challenge: string;
+    rpId: string;
+    userVerification: string;
+    createTimeout: string | number;
+    authenticators: KcContext.WebauthnAuthenticate.WebauthnAuthenticator[] | undefined;
+    loginAction: string;
+}
+
+export function useLogic(props: UseLogicProps) {
 
     const { msgStr } = useI18n();
+
+    const { isUserIdentified, challenge, rpId, userVerification, createTimeout, authenticators } = props;
 
     const webAuthnFormRef = useRef<HTMLFormElement>(null);
     const submitWebAuthn = (result: WebAuthnResult) => {
@@ -110,15 +120,15 @@ export function useLogic() {
     };
 
     const authOptions = {
-        isUserIdentified: kcContext.isUserIdentified === "true",
-        challenge: kcContext.challenge,
-        userVerification: kcContext.userVerification,
-        rpId: kcContext.rpId,
+        isUserIdentified: isUserIdentified === "true",
+        challenge: challenge,
+        userVerification: userVerification,
+        rpId: rpId,
         createTimeout:
-            typeof kcContext.createTimeout === "string"
-                ? Number(kcContext.createTimeout)
-                : kcContext.createTimeout,
-        authenticators: kcContext.authenticators?.authenticators
+            typeof createTimeout === "string"
+                ? Number(createTimeout)
+                : createTimeout,
+        authenticators: authenticators
     };
 
     const onPasskeyDoAuthenticateClick = async () => {

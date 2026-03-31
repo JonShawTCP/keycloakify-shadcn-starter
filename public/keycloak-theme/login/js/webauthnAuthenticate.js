@@ -1,12 +1,12 @@
 /**
- * This file has been claimed for ownership from @keycloakify/login-ui version 250004.6.5.
- * To relinquish ownership and restore this file to its original content, run the following command:
- * 
- * $ npx keycloakify own --path "login/js/webauthnAuthenticate.js" --public --revert
+ * WARNING: Before modifying this file, run the following command:
+ *
+ * $ npx keycloakify own --path "login/js/webauthnAuthenticate.js" --public
+ *
+ * This file is provided by @keycloakify/login-ui version 250004.6.5.
+ * It was copied into your repository by the postinstall script: `keycloakify sync-extensions`.
  */
 
-
-    
 import { base64url } from "./rfc4648.js";
 
 // singleton
@@ -27,42 +27,76 @@ export function signal() {
 export async function authenticateByWebAuthn(input) {
     if (!input.isUserIdentified) {
         try {
-            const result = await doAuthenticate([], input.challenge, input.userVerification, input.rpId, input.createTimeout, input.errmsg);
+            const result = await doAuthenticate(
+                [],
+                input.challenge,
+                input.userVerification,
+                input.rpId,
+                input.createTimeout,
+                input.errmsg
+            );
             returnSuccess(result);
         } catch (error) {
             returnFailure(error);
         }
         return;
     }
-    checkAllowCredentials(input.challenge, input.userVerification, input.rpId, input.createTimeout, input.errmsg);
+    checkAllowCredentials(
+        input.challenge,
+        input.userVerification,
+        input.rpId,
+        input.createTimeout,
+        input.errmsg
+    );
 }
 
-async function checkAllowCredentials(challenge, userVerification, rpId, createTimeout, errmsg) {
+async function checkAllowCredentials(
+    challenge,
+    userVerification,
+    rpId,
+    createTimeout,
+    errmsg
+) {
     const allowCredentials = [];
-    const authnUse = document.forms['authn_select'].authn_use_chk;
+    const authnUse = document.forms["authn_select"].authn_use_chk;
     if (authnUse !== undefined) {
         if (authnUse.length === undefined) {
             allowCredentials.push({
-                id: base64url.parse(authnUse.value, {loose: true}),
-                type: 'public-key',
+                id: base64url.parse(authnUse.value, { loose: true }),
+                type: "public-key"
             });
         } else {
-            authnUse.forEach((entry) =>
+            authnUse.forEach(entry =>
                 allowCredentials.push({
-                    id: base64url.parse(entry.value, {loose: true}),
-                    type: 'public-key',
-                }));
+                    id: base64url.parse(entry.value, { loose: true }),
+                    type: "public-key"
+                })
+            );
         }
     }
     try {
-        const result = await doAuthenticate(allowCredentials, challenge, userVerification, rpId, createTimeout, errmsg);
+        const result = await doAuthenticate(
+            allowCredentials,
+            challenge,
+            userVerification,
+            rpId,
+            createTimeout,
+            errmsg
+        );
         returnSuccess(result);
     } catch (error) {
         returnFailure(error);
     }
 }
 
-function doAuthenticate(allowCredentials, challenge, userVerification, rpId, createTimeout, errmsg) {
+function doAuthenticate(
+    allowCredentials,
+    challenge,
+    userVerification,
+    rpId,
+    createTimeout,
+    errmsg
+) {
     // Check if WebAuthn is supported by this browser
     if (!window.PublicKeyCredential) {
         returnFailure(errmsg);
@@ -70,7 +104,7 @@ function doAuthenticate(allowCredentials, challenge, userVerification, rpId, cre
     }
 
     const publicKey = {
-        rpId : rpId,
+        rpId: rpId,
         challenge: base64url.parse(challenge, { loose: true })
     };
 
@@ -82,7 +116,7 @@ function doAuthenticate(allowCredentials, challenge, userVerification, rpId, cre
         publicKey.allowCredentials = allowCredentials;
     }
 
-    if (userVerification !== 'not specified') {
+    if (userVerification !== "not specified") {
         publicKey.userVerification = userVerification;
     }
 
@@ -93,12 +127,24 @@ function doAuthenticate(allowCredentials, challenge, userVerification, rpId, cre
 }
 
 export function returnSuccess(result) {
-    document.getElementById("clientDataJSON").value = base64url.stringify(new Uint8Array(result.response.clientDataJSON), { pad: false });
-    document.getElementById("authenticatorData").value = base64url.stringify(new Uint8Array(result.response.authenticatorData), { pad: false });
-    document.getElementById("signature").value = base64url.stringify(new Uint8Array(result.response.signature), { pad: false });
+    document.getElementById("clientDataJSON").value = base64url.stringify(
+        new Uint8Array(result.response.clientDataJSON),
+        { pad: false }
+    );
+    document.getElementById("authenticatorData").value = base64url.stringify(
+        new Uint8Array(result.response.authenticatorData),
+        { pad: false }
+    );
+    document.getElementById("signature").value = base64url.stringify(
+        new Uint8Array(result.response.signature),
+        { pad: false }
+    );
     document.getElementById("credentialId").value = result.id;
     if (result.response.userHandle) {
-        document.getElementById("userHandle").value = base64url.stringify(new Uint8Array(result.response.userHandle), { pad: false });
+        document.getElementById("userHandle").value = base64url.stringify(
+            new Uint8Array(result.response.userHandle),
+            { pad: false }
+        );
     }
     document.getElementById("webauth").requestSubmit();
 }
@@ -107,7 +153,3 @@ export function returnFailure(err) {
     document.getElementById("error").value = err;
     document.getElementById("webauth").requestSubmit();
 }
-
-    
-    
-    

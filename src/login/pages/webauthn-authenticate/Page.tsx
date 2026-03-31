@@ -1,14 +1,13 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { WebAuthnConditionalUI } from '@/login/components/WebAuthnConditionalUi';
 import { useI18n } from "@/login/i18n";
 import { useKcContext } from "@/login/KcContext";
 import { useKcClsx } from "@keycloakify/login-ui/useKcClsx";
 import { clsx } from "keycloakify/tools/clsx";
-import { Fingerprint, Shield } from "lucide-react";
+import { Shield } from "lucide-react";
 import { Fragment } from "react";
 import { assert } from "tsafe/assert";
 import { Template } from "../../components/Template";
-import { useScript } from "./useScript";
 
 export function Page() {
     const { kcContext } = useKcContext();
@@ -21,14 +20,15 @@ export function Page() {
         realm,
         registrationDisabled,
         authenticators,
-        shouldDisplayAuthenticators
+        shouldDisplayAuthenticators,
+        userVerification,
+        createTimeout,
+        rpId,
+        challenge,
+        isUserIdentified,
     } = kcContext;
 
-    const { msg, msgStr, advancedMsg } = useI18n();
-
-    const webAuthnButtonId = "authenticateWebAuthnButton";
-
-    useScript({ webAuthnButtonId });
+    const { msg, advancedMsg } = useI18n();
 
     return (
         <Template
@@ -50,22 +50,6 @@ export function Page() {
             headerNode={msg("webauthn-login-title")}
         >
             <div className="space-y-4">
-                <form
-                    id="webauth"
-                    hidden
-                    action={url.loginAction}
-                    method="post">
-                    <input type="hidden" id="clientDataJSON" name="clientDataJSON" />
-                    <input
-                        type="hidden"
-                        id="authenticatorData"
-                        name="authenticatorData"
-                    />
-                    <input type="hidden" id="signature" name="signature" />
-                    <input type="hidden" id="credentialId" name="credentialId" />
-                    <input type="hidden" id="userHandle" name="userHandle" />
-                    <input type="hidden" id="error" name="error" />
-                </form>
 
                 {authenticators && (
                     <>
@@ -200,10 +184,15 @@ export function Page() {
                     </>
                 )}
 
-                <Button id={webAuthnButtonId} type="button" autoFocus className="w-full">
-                    <Fingerprint className="w-4 h-4" />
-                    {msgStr("webauthn-doAuthenticate")}
-                </Button>
+                <WebAuthnConditionalUI
+                    isUserIdentified={isUserIdentified}
+                    challenge={challenge}
+                    rpId={rpId}
+                    userVerification={userVerification}
+                    createTimeout={createTimeout}
+                    authenticators={authenticators.authenticators}
+                    loginAction={url.loginAction}
+                />
             </div>
         </Template>
     );

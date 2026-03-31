@@ -1,8 +1,10 @@
 /**
- * This file has been claimed for ownership from @keycloakify/login-ui version 250004.6.5.
- * To relinquish ownership and restore this file to its original content, run the following command:
- * 
- * $ npx keycloakify own --path "login/js/passkeysConditionalAuth.js" --public --revert
+ * WARNING: Before modifying this file, run the following command:
+ *
+ * $ npx keycloakify own --path "login/js/passkeysConditionalAuth.js" --public
+ *
+ * This file is provided by @keycloakify/login-ui version 250004.6.5.
+ * It was copied into your repository by the postinstall script: `keycloakify sync-extensions`.
  */
 
 import { base64url } from "./rfc4648.js";
@@ -14,8 +16,11 @@ export function initAuthenticate(input) {
         returnFailure(input.errmsg);
         return;
     }
-    if (input.isUserIdentified || typeof PublicKeyCredential.isConditionalMediationAvailable === "undefined") {
-        document.getElementById("kc-form-passkey-button").style.display = 'block';
+    if (
+        input.isUserIdentified ||
+        typeof PublicKeyCredential.isConditionalMediationAvailable === "undefined"
+    ) {
+        document.getElementById("kc-form-passkey-button").style.display = "block";
     } else {
         tryAutoFillUI(input);
     }
@@ -29,7 +34,7 @@ function doAuthenticate(input) {
     }
 
     const publicKey = {
-        rpId : input.rpId,
+        rpId: input.rpId,
         challenge: base64url.parse(input.challenge, { loose: true })
     };
 
@@ -39,7 +44,7 @@ function doAuthenticate(input) {
         publicKey.timeout = input.createTimeout * 1000;
     }
 
-    if (input.userVerification !== 'not specified') {
+    if (input.userVerification !== "not specified") {
         publicKey.userVerification = input.userVerification;
     }
 
@@ -50,10 +55,11 @@ function doAuthenticate(input) {
 }
 
 async function tryAutoFillUI(input) {
-    const isConditionalMediationAvailable = await PublicKeyCredential.isConditionalMediationAvailable();
+    const isConditionalMediationAvailable =
+        await PublicKeyCredential.isConditionalMediationAvailable();
     if (isConditionalMediationAvailable) {
         document.getElementById("kc-form-login").style.display = "block";
-        input.additionalOptions = { mediation: 'conditional'};
+        input.additionalOptions = { mediation: "conditional" };
         try {
             const result = await doAuthenticate(input);
             returnSuccess(result);
@@ -61,25 +67,26 @@ async function tryAutoFillUI(input) {
             returnFailure(error);
         }
     } else {
-        document.getElementById("kc-form-passkey-button").style.display = 'block';
+        document.getElementById("kc-form-passkey-button").style.display = "block";
     }
 }
 
 function getAllowCredentials() {
     const allowCredentials = [];
-    const authnUse = document.forms['authn_select'].authn_use_chk;
+    const authnUse = document.forms["authn_select"].authn_use_chk;
     if (authnUse !== undefined) {
         if (authnUse.length === undefined) {
             allowCredentials.push({
-                id: base64url.parse(authnUse.value, {loose: true}),
-                type: 'public-key',
+                id: base64url.parse(authnUse.value, { loose: true }),
+                type: "public-key"
             });
         } else {
-            authnUse.forEach((entry) =>
+            authnUse.forEach(entry =>
                 allowCredentials.push({
-                    id: base64url.parse(entry.value, {loose: true}),
-                    type: 'public-key',
-                }));
+                    id: base64url.parse(entry.value, { loose: true }),
+                    type: "public-key"
+                })
+            );
         }
     }
     return allowCredentials;
